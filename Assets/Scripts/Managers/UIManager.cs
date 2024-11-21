@@ -9,7 +9,10 @@ public class UIManager : MonoBehaviour
     private string Header = "[ UIManager ]";
     private GameManager gameManager;
 
-    [Header("UI Elements")]
+    [Header("[Settings]")]
+    public GameObject setting_panel;
+
+    [Header("[UI Elements]")]
     public GameObject quit_panel;        // Quit 패널 (Inspector에서 연결)
     public Button quit_yes_button;      // Quit Yes 버튼 (Inspector에서 연결)
     public Button quit_no_button;       // Quit No 버튼 (Inspector에서 연결)
@@ -31,6 +34,10 @@ public class UIManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape) && quit_panel.activeSelf)
         {
             OnControlQuitPanel(false);
+        }
+        else if (Input.GetKeyDown(KeyCode.Escape))
+        {
+
         }
     }
 

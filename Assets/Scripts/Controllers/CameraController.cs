@@ -1,62 +1,43 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class CameraController : MonoBehaviour
+public class CamController : MonoBehaviour
 {
-    [Header("Camera Settings")]
-    private float sensitivity = 5f;
-    private float cameraRotationLimitX = 40f;
-    private float rotationSmoothTime = 0.1f;
-
-    [Header("Player Settings")]
-    [SerializeField] private Rigidbody playerRb;
-
-    private float currentCameraRotationX = 0f;
-
-    private Camera targetCamera;
-
-    public float Sensitivity
-    {
-        get { return sensitivity; }
-    }
+    private GameObject player;
+    private float xMove = -90f;
+    private float yMove = 0;
+    private float distance = 10;
+    private float wheelSpeed = 10.0f;
 
     private void Start()
     {
-        targetCamera = GetComponent<Camera>();
-        if (targetCamera == null)
-        {
-            Debug.LogError("CameraController가 Camera 컴포넌트를 찾을 수 없습니다.");
-        }
+        if (GameObject.FindWithTag("Player") != null)
+            player = GameObject.FindWithTag("Player");
+        else
+            Debug.Log("Player 오브젝트 없음");
     }
 
     private void Update()
     {
-        HandleCameraRotation();
+        CameraMove();
     }
 
-    private void HandleCameraRotation()
+    private void CameraMove()
     {
         if (Input.GetMouseButton(1))
         {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-
-            float mouseY = Input.GetAxis("Mouse Y") * sensitivity;
-
-            currentCameraRotationX -= mouseY;
-            currentCameraRotationX = Mathf.Clamp(currentCameraRotationX, -cameraRotationLimitX, cameraRotationLimitX);
-
-            float currentRotationX = transform.localEulerAngles.x;
-            if (currentRotationX > 180f)
-                currentRotationX -= 360f;
-
-            float smoothRotationX = Mathf.LerpAngle(currentRotationX, currentCameraRotationX, Time.deltaTime / rotationSmoothTime);
-
-            transform.localEulerAngles = new Vector3(smoothRotationX, 0f, 0f);
+            xMove += Input.GetAxis("Mouse X");
+            yMove -= Input.GetAxis("Mouse Y");
         }
-        else
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
+
+        transform.rotation = Quaternion.Euler(yMove, xMove, 0);
+
+        distance -= Input.GetAxis("Mouse ScrollWheel") * wheelSpeed;
+        distance = Mathf.Clamp(distance, 1.0f, 10.0f);
+
+        Vector3 reverseDistance = new Vector3(0.0f, -2.0f, distance);
+
+        transform.position = player.transform.position - transform.rotation * reverseDistance;
     }
 }
