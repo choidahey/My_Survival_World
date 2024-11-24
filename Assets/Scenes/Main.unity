@@ -28483,7 +28483,12 @@ Animator:
   m_ApplyRootMotion: 1
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
-  m_WarningMessage: 
+  m_WarningMessage: "\nBinding warning: Some generic clip(s) animate transforms that
+    are already bound by a Humanoid avatar. These transforms can only be changed
+    by Humanoid clips.\n\tTransform 'root'\n\tTransform 'c_thumb1.r'\n\tTransform
+    'c_middle1.r'\n\tTransform 'root'\n\tTransform 'arm_stretch.l'\n\tTransform 'spine_02.x'\n\tTransform
+    'spine_01.x'\n\tTransform 'thigh_stretch.r'\n\tTransform 'c_index2.r'\n\tTransform
+    'c_middle2.r'\n\tand more ...\n\tFrom animation clip 'Jumping Up'"
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
@@ -32504,9 +32509,9 @@ SceneRoots:
   - {fileID: 9099099296874916375}
   - {fileID: 1940115119}
   - {fileID: 597657717}
+  - {fileID: 1024089387}
   - {fileID: 1119575402}
   - {fileID: 1117253892}
   - {fileID: 420757241}
-  - {fileID: 1024089387}
   - {fileID: 295933586}
   - {fileID: 1206135046}

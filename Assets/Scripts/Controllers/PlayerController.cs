@@ -8,20 +8,18 @@ public class PlayerController : MonoBehaviour
 
     private float walkSpeed = 5f;
     private float runScale = 5f;
-    private float turnSpeed = 200f;
     private float jumpForce = 7f;
 
-    private bool wasGrounded;
-    private bool isGrounded;
-    private bool jumpInput = false;
+    private bool isGrounded = true;
+    //private float checkDistance = 1.1f;
+    private bool isJumpAir = false;
+    private bool isFalling = false;
 
     private float currentH = 0f;
     private float currentV = 0f;
 
-    private float jumpTimeStamp = 0f;
-    private float minJumpInterval = 0.25f;
-
     private Vector3 currentDirection = Vector3.zero;
+    private LayerMask groundLayer;
 
     private Animator animator;
     private Rigidbody rigidBody;
@@ -30,30 +28,20 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
+        if (GetComponent<Rigidbody>() != null)
+            rigidBody = GetComponent<Rigidbody>();
+
         if (GetComponent<Animator>() != null)
             animator = GetComponent<Animator>();
 
-        if (GetComponent<Rigidbody>() != null)
-            rigidBody = GetComponent<Rigidbody>();
+        groundLayer = LayerMask.NameToLayer("Ground");
     }
 
     private void Update()
     {
-        if (!jumpInput && Input.GetKey(KeyCode.Space))
-        {
-            jumpInput = true;
-        }
-    }
-
-    private void FixedUpdate()
-    {
-        animator.SetBool("isGrounded", isGrounded);
-
         Move();
         Jump();
 
-        wasGrounded = isGrounded;
-        jumpInput = false;
     }
 
     private void Move()
@@ -93,14 +81,32 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    //private bool IsGrounded()
+    //{
+    //    RaycastHit hit;
+        
+
+    //    if (Physics.Raycast(this.transform.position, Vector3.down, out hit, this.checkDistance, groundLayer))
+    //        return true;
+        
+    //    return false;
+    //}
+
     private void Jump()
     {
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        if (Input.GetButtonDown("Jump") && isGrounded)  // 점프 버튼이 눌렸고 땅에 닿아있을 때 점프 가능
         {
+            isGrounded = false;
+
             Vector3 jumpVelocity = Vector3.up * Mathf.Sqrt(jumpForce * -Physics.gravity.y);
             rigidBody.AddForce(jumpVelocity, ForceMode.Impulse);
-            isGrounded = false;
+
+            animator.SetBool("isGrounded", isGrounded);
+            animator.SetBool("isFalling", isGrounded);
         }
+        Debug.Log("isGrounded " + isGrounded);
+        animator.SetBool("isGrounded", isGrounded);
+        animator.SetBool("isFalling", isGrounded);
     }
 
     private void OnCollisionEnter(Collision collision)

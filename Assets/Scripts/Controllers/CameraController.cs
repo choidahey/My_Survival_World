@@ -18,7 +18,7 @@ public class CamController : MonoBehaviour
             Debug.Log("Player 오브젝트 없음");
     }
 
-    private void Update()
+    private void LateUpdate()
     {
         CameraMove();
     }
