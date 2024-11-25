@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
+    public static UIManager instance { get; private set; }
     // Todo
     // 설정에 마우스 감도 추가
     private string Header = "[ UIManager ]";
@@ -12,21 +13,43 @@ public class UIManager : MonoBehaviour
     [Header("[Settings]")]
     public GameObject setting_panel;
 
-    [Header("[UI Elements]")]
-    public GameObject quit_panel;        // Quit 패널 (Inspector에서 연결)
-    public Button quit_yes_button;      // Quit Yes 버튼 (Inspector에서 연결)
-    public Button quit_no_button;       // Quit No 버튼 (Inspector에서 연결)
-    public Button quit_button;          // Quit 버튼 (Inspector에서 연결)
+    [Header("[Quit Setting]")]
+    public GameObject quit_panel;
+    public Button quit_yes_button;
+    public Button quit_no_button;
+    public Button quit_button;
 
-    private GameObject modal_background; // 동적으로 생성된 모달 배경
+    private GameObject modal_background;
     private Dictionary<Button, System.Action> buttonActions;
+
+    private bool isActivePanel = false;
+
+    [Header("[Stamina]")]
+    [SerializeField] private Slider staminaBar;
+
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+            Destroy(gameObject);
+    }
+
 
     private void Start()
     {
         InitializeGameManager();
-        CreateModalBackground();         // 모달 배경 생성
+        CreateModalBackground();
         RegisterQuitButtons();
-        OnControlQuitPanel(false);       // 초기 상태에서 Quit 패널 비활성화
+        OnControlQuitPanel(false);
+
+        if (staminaBar != null)
+            staminaBar.value = 100f;
+        else
+            Debug.Log("스태미너 바 없음");
     }
 
     private void Update()
@@ -37,7 +60,7 @@ public class UIManager : MonoBehaviour
         }
         else if (Input.GetKeyDown(KeyCode.Escape))
         {
-
+            OnControlQuitPanel(true);
         }
     }
 
@@ -47,7 +70,7 @@ public class UIManager : MonoBehaviour
         gameManager = FindObjectOfType<GameManager>();
         if (gameManager == null)
         {
-            Debug.LogError(Header + " GameManager를 찾을 수 없습니다!");
+            Debug.Log(Header + " GameManager를 찾을 수 없습니다!");
         }
     }
 
@@ -125,5 +148,15 @@ public class UIManager : MonoBehaviour
                 Debug.LogError($"{Header} 버튼이 연결되지 않았습니다!");
             }
         }
+    }
+
+    public void UpdateStaminaBar(float value)
+    {
+        if (staminaBar != null)
+        {
+            staminaBar.value = value;
+        }
+        else
+            Debug.Log("스테미나 바 없음");
     }
 }

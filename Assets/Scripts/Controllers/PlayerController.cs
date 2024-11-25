@@ -11,8 +11,6 @@ public class PlayerController : MonoBehaviour
     private float jumpForce = 7f;
 
     private bool isGrounded = true;
-    //private float checkDistance = 1.1f;
-    private bool isJumpAir = false;
     private bool isFalling = false;
 
     private float currentH = 0f;
@@ -24,6 +22,8 @@ public class PlayerController : MonoBehaviour
     private Animator animator;
     private Rigidbody rigidBody;
     private List<Collider> collisions = new List<Collider>();
+
+    private float runStaminaCost = 30f;
 
 
     private void Awake()
@@ -51,11 +51,33 @@ public class PlayerController : MonoBehaviour
 
         Transform camera = Camera.main.transform;
 
-        if (Input.GetKey(KeyCode.LeftShift))
+        bool isRunning = false;
+
+        if (StaminaManager.instance.isExhausted)
         {
+            v *= 0f;
+            h *= 0f;
+
+            animator.SetFloat("MoveSpeed", 0f);
+            // TODO :: 탈진 모션 추가하기
+
+            return;
+        }
+
+        if (Input.GetKey(KeyCode.LeftShift) && StaminaManager.instance.HasEnoughStamina(runStaminaCost * Time.deltaTime))
+        {
+            isRunning = true;
+            StaminaManager.instance.ConsumeStamina(runStaminaCost * Time.deltaTime);
             v *= runScale;
             h *= runScale;
         }
+        else
+        {
+            v *= 1f;
+            h *= 1f;
+            isRunning = false;
+        }
+
 
         float interpolation = 10f;
 
@@ -77,91 +99,37 @@ public class PlayerController : MonoBehaviour
             transform.position += currentDirection * walkSpeed * Time.deltaTime;
 
             animator.SetFloat("MoveSpeed", direction.magnitude);
-            Debug.Log("MoveSpeed" + direction.magnitude);  // walk 는 최대 1, run은 최대 5
+        }
+        else
+        {
+            animator.SetFloat("MoveSpeed", 0f);
+        }
+
+        if (!isRunning)
+        {
+            StaminaManager.instance.EnableStaminaRegen();
+        }
+        else
+        {
+            StaminaManager.instance.DisableStaminaRegen();
         }
     }
 
-    //private bool IsGrounded()
-    //{
-    //    RaycastHit hit;
-        
-
-    //    if (Physics.Raycast(this.transform.position, Vector3.down, out hit, this.checkDistance, groundLayer))
-    //        return true;
-        
-    //    return false;
-    //}
-
     private void Jump()
     {
-        if (Input.GetButtonDown("Jump") && isGrounded)  // 점프 버튼이 눌렸고 땅에 닿아있을 때 점프 가능
+        if (Input.GetButtonDown("Jump") && isGrounded)
         {
             isGrounded = false;
+            isFalling = true;
 
             Vector3 jumpVelocity = Vector3.up * Mathf.Sqrt(jumpForce * -Physics.gravity.y);
             rigidBody.AddForce(jumpVelocity, ForceMode.Impulse);
 
             animator.SetBool("isGrounded", isGrounded);
-            animator.SetBool("isFalling", isGrounded);
+            animator.SetBool("isFalling", isFalling);
         }
-        Debug.Log("isGrounded " + isGrounded);
+
         animator.SetBool("isGrounded", isGrounded);
-        animator.SetBool("isFalling", isGrounded);
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        ContactPoint[] contactPoints = collision.contacts;
-
-        for (int i = 0; i < contactPoints.Length; i++)
-        {
-            if (Vector3.Dot(contactPoints[i].normal, Vector3.up) > 0.5f)
-            {
-                if (!collisions.Contains(collision.collider))
-                {
-                    collisions.Add(collision.collider);
-                }
-                isGrounded = true;
-            }
-        }
-    }
-
-    private void OnCollisionStay(Collision collision)
-    {
-        ContactPoint[] contactPoints = collision.contacts;
-        bool validSurfaceNormal = false;
-        for (int i = 0; i < contactPoints.Length; i++)
-        {
-            if (Vector3.Dot(contactPoints[i].normal, Vector3.up) > 0.5f)
-            {
-                validSurfaceNormal = true; break;
-            }
-        }
-
-        if (validSurfaceNormal)
-        {
-            isGrounded = true;
-            if (!collisions.Contains(collision.collider))
-            {
-                collisions.Add(collision.collider);
-            }
-        }
-        else
-        {
-            if (collisions.Contains(collision.collider))
-            {
-                collisions.Remove(collision.collider);
-            }
-            if (collisions.Count == 0) { isGrounded = false; }
-        }
-    }
-
-    private void OnCollisionExit(Collision collision)
-    {
-        if (collisions.Contains(collision.collider))
-        {
-            collisions.Remove(collision.collider);
-        }
-        if (collisions.Count == 0) { isGrounded = false; }
+        animator.SetBool("isFalling", isFalling);
     }
 }
